@@ -1,5 +1,5 @@
 name: weather_app
-description: Weather App
+description: Premium Weather App
 publish_to: 'none'
 
 version: 1.0.0+1
@@ -13,9 +13,9 @@ dependencies:
 
   cupertino_icons: ^1.0.8
   http: ^1.6.0
-  fl_chart: ^0.66.2
   intl: ^0.19.0
   geolocator: ^14.0.3
+  lottie: ^3.1.2
 
 dev_dependencies:
   flutter_test:
@@ -24,3 +24,6 @@ dev_dependencies:
 
 flutter:
   uses-material-design: true
+
+  assets:
+    - assets/animations/

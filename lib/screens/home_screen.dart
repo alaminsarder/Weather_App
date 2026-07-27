@@ -1,5 +1,5 @@
+import 'dart:ui';
 import 'package:flutter/material.dart';
-import 'package:fl_chart/fl_chart.dart';
 import 'package:intl/intl.dart';
 import 'package:geolocator/geolocator.dart';
 import '../services/weather_service.dart';
@@ -11,24 +11,20 @@ class HomeScreen extends StatefulWidget {
   State<HomeScreen> createState() => _HomeScreenState();
 }
 
-class _HomeScreenState extends State<HomeScreen>
-    with SingleTickerProviderStateMixin {
+class _HomeScreenState extends State<HomeScreen> {
   final WeatherService weatherService = WeatherService();
   final TextEditingController controller = TextEditingController();
 
   Map<String, dynamic>? weatherData;
   bool isLoading = true;
-  late TabController _tabController;
 
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 3, vsync: this);
-    loadWeather("Dhaka");
+    loadWeather("Bogura"); // ✅ Default Bogura
   }
 
   Future<void> loadWeather(String city) async {
-    if (city.isEmpty) return;
     setState(() => isLoading = true);
     final data = await weatherService.fetchWeather(city);
     setState(() {
@@ -47,8 +43,7 @@ class _HomeScreenState extends State<HomeScreen>
       return;
     }
 
-    Position position = await Geolocator.getCurrentPosition(
-        desiredAccuracy: LocationAccuracy.high);
+    Position position = await Geolocator.getCurrentPosition();
 
     final data = await weatherService.fetchByLocation(
         position.latitude, position.longitude);
@@ -61,159 +56,139 @@ class _HomeScreenState extends State<HomeScreen>
 
   @override
   Widget build(BuildContext context) {
+    if (isLoading) {
+      return const Scaffold(
+        body: Center(child: CircularProgressIndicator()),
+      );
+    }
+
+    final current = weatherData!['list'][0];
+    final city = weatherData!['city']['name'];
+    final temp = current['main']['temp'];
+    final desc = current['weather'][0]['description'];
+    final max = current['main']['temp_max'];
+    final min = current['main']['temp_min'];
+
     return Scaffold(
-      body: SafeArea(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.all(20),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              /// 🔍 Search + Location
-              Row(
-                children: [
-                  Expanded(
-                    child: TextField(
-                      controller: controller,
-                      decoration: const InputDecoration(
-                        hintText: "Search city",
-                        border: OutlineInputBorder(),
+      body: Container(
+        decoration: const BoxDecoration(
+          gradient: LinearGradient(
+            colors: [
+              Color(0xFF0F9D58), // ✅ Google green
+              Color(0xFF004D40),
+            ],
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+          ),
+        ),
+        child: SafeArea(
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.all(20),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                /// ✅ Search Bar (White Water Style)
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 15),
+                  decoration: BoxDecoration(
+                    color: Colors.white.withOpacity(0.9),
+                    borderRadius: BorderRadius.circular(30),
+                  ),
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: TextField(
+                          controller: controller,
+                          decoration: const InputDecoration(
+                            hintText: "Search city",
+                            border: InputBorder.none,
+                          ),
+                        ),
+                      ),
+                      IconButton(
+                        icon: const Icon(Icons.search),
+                        onPressed: () => loadWeather(controller.text.trim()),
+                      ),
+                      IconButton(
+                        icon: const Icon(Icons.my_location),
+                        onPressed: loadLocation,
+                      ),
+                    ],
+                  ),
+                ),
+
+                const SizedBox(height: 40),
+
+                Text(city,
+                    style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 28,
+                        fontWeight: FontWeight.w500)),
+
+                Text("${temp.round()}°",
+                    style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 90,
+                        fontWeight: FontWeight.w200)),
+
+                Text(desc,
+                    style:
+                        const TextStyle(color: Colors.white70, fontSize: 20)),
+
+                Text("↑${max.round()}° ↓${min.round()}°",
+                    style: const TextStyle(color: Colors.white60)),
+
+                Text(DateFormat('EEE, HH:mm').format(DateTime.now()),
+                    style: const TextStyle(color: Colors.white60)),
+
+                const SizedBox(height: 30),
+
+                /// ✅ Glass Hourly Card
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(20),
+                  child: BackdropFilter(
+                    filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+                    child: Container(
+                      padding: const EdgeInsets.all(15),
+                      color: Colors.white.withOpacity(0.1),
+                      child: SizedBox(
+                        height: 100,
+                        child: ListView.builder(
+                          scrollDirection: Axis.horizontal,
+                          itemCount: 8,
+                          itemBuilder: (context, index) {
+                            final item = weatherData!['list'][index];
+                            final t = item['main']['temp'];
+                            final time = DateFormat('HH:mm')
+                                .format(DateTime.parse(item['dt_txt']));
+
+                            return Padding(
+                              padding:
+                                  const EdgeInsets.symmetric(horizontal: 10),
+                              child: Column(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceEvenly,
+                                children: [
+                                  Text(time,
+                                      style: const TextStyle(
+                                          color: Colors.white70)),
+                                  const Icon(Icons.cloud, color: Colors.white),
+                                  Text("${t.round()}°",
+                                      style:
+                                          const TextStyle(color: Colors.white)),
+                                ],
+                              ),
+                            );
+                          },
+                        ),
                       ),
                     ),
                   ),
-                  IconButton(
-                    icon: const Icon(Icons.search),
-                    onPressed: () => loadWeather(controller.text.trim()),
-                  ),
-                  IconButton(
-                    icon: const Icon(Icons.my_location),
-                    onPressed: loadLocation,
-                  ),
-                ],
-              ),
-
-              const SizedBox(height: 20),
-
-              if (isLoading)
-                const Center(child: CircularProgressIndicator())
-              else if (weatherData == null ||
-                  weatherData!['cod'].toString() != "200")
-                const Center(child: Text("City not found"))
-              else
-                buildWeatherUI(),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget buildWeatherUI() {
-    final list = weatherData!['list'];
-    final city = weatherData!['city']['name'];
-    final current = list[0];
-
-    final temp = current['main']['temp'];
-    final humidity = current['main']['humidity'];
-    final wind = current['wind']['speed'];
-    final icon = current['weather'][0]['icon'];
-    final desc = current['weather'][0]['description'];
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Row(
-              children: [
-                Image.network(
-                  "https://openweathermap.org/img/wn/$icon@2x.png",
-                  width: 60,
                 ),
-                const SizedBox(width: 10),
-                Text("${temp.round()}°C",
-                    style: const TextStyle(
-                        fontSize: 42, fontWeight: FontWeight.bold)),
               ],
             ),
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.end,
-              children: [
-                Text(city,
-                    style: const TextStyle(
-                        fontSize: 22, fontWeight: FontWeight.w500)),
-                Text(DateFormat('EEEE hh:mm a').format(DateTime.now())),
-                Text(desc),
-              ],
-            )
-          ],
-        ),
-        const SizedBox(height: 10),
-        Text("Humidity: $humidity%"),
-        Text("Wind: $wind km/h"),
-        const SizedBox(height: 20),
-        TabBar(
-          controller: _tabController,
-          labelColor: Colors.orange,
-          unselectedLabelColor: Colors.grey,
-          tabs: const [
-            Tab(text: "Temperature"),
-            Tab(text: "Precipitation"),
-            Tab(text: "Wind"),
-          ],
-        ),
-        const SizedBox(height: 10),
-        SizedBox(
-          height: 200,
-          child: TabBarView(
-            controller: _tabController,
-            children: [
-              buildChart("temp"),
-              buildChart("pop"),
-              buildChart("wind"),
-            ],
           ),
         ),
-      ],
-    );
-  }
-
-  Widget buildChart(String type) {
-    List<FlSpot> spots = [];
-    final list = weatherData!['list'];
-
-    for (int i = 0; i < 8; i++) {
-      final item = list[i];
-      double value = 0;
-
-      if (type == "temp") {
-        value = item['main']['temp'].toDouble();
-      } else if (type == "pop") {
-        value = (item['pop'] * 100).toDouble();
-      } else {
-        value = item['wind']['speed'].toDouble();
-      }
-
-      spots.add(FlSpot(i.toDouble(), value));
-    }
-
-    return LineChart(
-      LineChartData(
-        gridData: FlGridData(show: false),
-        titlesData: FlTitlesData(show: false),
-        borderData: FlBorderData(show: false),
-        lineBarsData: [
-          LineChartBarData(
-            spots: spots,
-            isCurved: true,
-            color: Colors.orange,
-            belowBarData: BarAreaData(
-              show: true,
-              color: Colors.orange.withOpacity(0.3),
-            ),
-            dotData: FlDotData(show: false),
-          ),
-        ],
       ),
     );
   }
