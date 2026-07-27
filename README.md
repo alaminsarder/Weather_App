@@ -28,4 +28,5 @@ A modern Flutter weather application with real-time forecast, dynamic UI, and an
 2. Run:
    ```bash
    flutter pub get
- flutter run -d chrome
+    flutter run -d chrome
+
