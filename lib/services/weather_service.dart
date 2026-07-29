@@ -10,7 +10,7 @@ class WeatherService {
 
     final response = await http.get(Uri.parse(url));
     if (response.statusCode == 200) {
-      return json.decode(response.body);
+      return jsonDecode(response.body);
     }
     return null;
   }
@@ -21,7 +21,7 @@ class WeatherService {
 
     final response = await http.get(Uri.parse(url));
     if (response.statusCode == 200) {
-      return json.decode(response.body);
+      return jsonDecode(response.body);
     }
     return null;
   }
