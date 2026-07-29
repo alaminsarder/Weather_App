@@ -34,7 +34,9 @@ class _HomeScreenState extends State<HomeScreen>
 
   Future<void> loadWeather(String city) async {
     setState(() => isLoading = true);
+
     final data = await weatherService.fetchWeather(city);
+
     setState(() {
       weatherData = data;
       isLoading = false;
@@ -90,6 +92,8 @@ class _HomeScreenState extends State<HomeScreen>
     final temp = current['main']['temp'];
     final desc = current['weather'][0]['main'];
     final list = weatherData!['list'];
+
+    final totalDays = (list.length / 8).floor();
 
     return Scaffold(
       backgroundColor: const Color(0xFF1B1742),
@@ -251,13 +255,13 @@ class _HomeScreenState extends State<HomeScreen>
 
                     const SizedBox(height: 30),
 
-                    /// ✅ Last 7 Days
+                    /// ✅ Last 5 Days Safe
                     const Padding(
                       padding: EdgeInsets.symmetric(horizontal: 16),
                       child: Align(
                         alignment: Alignment.centerLeft,
                         child: Text(
-                          "Last 7 Days",
+                          "Last 5 Days",
                           style: TextStyle(
                               color: Colors.white,
                               fontSize: 18,
@@ -271,9 +275,11 @@ class _HomeScreenState extends State<HomeScreen>
                     ListView.builder(
                       shrinkWrap: true,
                       physics: const NeverScrollableScrollPhysics(),
-                      itemCount: 7,
+                      itemCount: totalDays,
                       itemBuilder: (context, index) {
-                        final dayData = list[index * 8];
+                        final dayIndex = index * 8;
+
+                        final dayData = list[dayIndex];
 
                         final dayName = DateFormat('EEEE')
                             .format(DateTime.parse(dayData['dt_txt']));
