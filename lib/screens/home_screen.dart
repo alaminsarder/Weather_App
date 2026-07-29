@@ -146,110 +146,165 @@ class _HomeScreenState extends State<HomeScreen>
               ),
 
             SafeArea(
-              child: Column(
-                children: [
-                  /// ✅ Top Bar
-                  Padding(
-                    padding: const EdgeInsets.all(16),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Text(
-                          weatherData!['city']['name'],
-                          style: const TextStyle(
-                              color: Colors.white, fontSize: 22),
-                        ),
-                        Row(
-                          children: [
-                            IconButton(
-                              icon:
-                                  const Icon(Icons.search, color: Colors.white),
-                              onPressed: () {
-                                showSearchDialog(context);
-                              },
-                            ),
-                            IconButton(
-                              icon: const Icon(Icons.my_location,
-                                  color: Colors.white),
-                              onPressed: loadLocation,
-                            ),
-                          ],
-                        )
-                      ],
+              child: SingleChildScrollView(
+                child: Column(
+                  children: [
+                    /// ✅ Top Bar
+                    Padding(
+                      padding: const EdgeInsets.all(16),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text(
+                            weatherData!['city']['name'],
+                            style: const TextStyle(
+                                color: Colors.white, fontSize: 22),
+                          ),
+                          Row(
+                            children: [
+                              IconButton(
+                                icon: const Icon(Icons.search,
+                                    color: Colors.white),
+                                onPressed: () {
+                                  showSearchDialog(context);
+                                },
+                              ),
+                              IconButton(
+                                icon: const Icon(Icons.my_location,
+                                    color: Colors.white),
+                                onPressed: loadLocation,
+                              ),
+                            ],
+                          )
+                        ],
+                      ),
                     ),
-                  ),
 
-                  const SizedBox(height: 20),
+                    const SizedBox(height: 20),
 
-                  /// ✅ Temperature
-                  Text("${temp.round()}°",
-                      style: const TextStyle(
-                          fontSize: 100,
-                          fontWeight: FontWeight.w200,
-                          color: Colors.white)),
+                    /// ✅ Temperature
+                    Text("${temp.round()}°",
+                        style: const TextStyle(
+                            fontSize: 100,
+                            fontWeight: FontWeight.w200,
+                            color: Colors.white)),
 
-                  Text(desc, style: const TextStyle(color: Colors.white70)),
+                    Text(desc, style: const TextStyle(color: Colors.white70)),
 
-                  Text(
-                    DateFormat('h:mm a').format(DateTime.now()),
-                    style: const TextStyle(color: Colors.white60),
-                  ),
+                    Text(
+                      DateFormat('h:mm a').format(DateTime.now()),
+                      style: const TextStyle(color: Colors.white60),
+                    ),
 
-                  const SizedBox(height: 40),
+                    const SizedBox(height: 40),
 
-                  /// ✅ Hourly
-                  SizedBox(
-                    height: 120,
-                    child: ListView.builder(
-                      scrollDirection: Axis.horizontal,
-                      itemCount: 8,
+                    /// ✅ Hourly
+                    SizedBox(
+                      height: 120,
+                      child: ListView.builder(
+                        scrollDirection: Axis.horizontal,
+                        itemCount: 8,
+                        itemBuilder: (context, index) {
+                          final item = list[index];
+                          final active = index == selectedIndex;
+
+                          return GestureDetector(
+                            onTap: () {
+                              setState(() {
+                                selectedIndex = index;
+                              });
+                            },
+                            child: AnimatedContainer(
+                              duration: const Duration(milliseconds: 300),
+                              width: 75,
+                              margin: const EdgeInsets.only(right: 15),
+                              decoration: BoxDecoration(
+                                shape: BoxShape.circle,
+                                gradient: active
+                                    ? const LinearGradient(colors: [
+                                        Color(0xFF7C3AED),
+                                        Color(0xFF9333EA)
+                                      ])
+                                    : null,
+                                border: Border.all(color: Colors.white24),
+                              ),
+                              child: Column(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Text(
+                                    DateFormat('h a')
+                                        .format(DateTime.parse(item['dt_txt'])),
+                                    style: const TextStyle(
+                                        fontSize: 12, color: Colors.white70),
+                                  ),
+                                  const SizedBox(height: 5),
+                                  Text("${item['main']['temp'].round()}°",
+                                      style:
+                                          const TextStyle(color: Colors.white)),
+                                ],
+                              ),
+                            ),
+                          );
+                        },
+                      ),
+                    ),
+
+                    const SizedBox(height: 30),
+
+                    /// ✅ Last 7 Days
+                    const Padding(
+                      padding: EdgeInsets.symmetric(horizontal: 16),
+                      child: Align(
+                        alignment: Alignment.centerLeft,
+                        child: Text(
+                          "Last 7 Days",
+                          style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 18,
+                              fontWeight: FontWeight.w500),
+                        ),
+                      ),
+                    ),
+
+                    const SizedBox(height: 10),
+
+                    ListView.builder(
+                      shrinkWrap: true,
+                      physics: const NeverScrollableScrollPhysics(),
+                      itemCount: 7,
                       itemBuilder: (context, index) {
-                        final item = list[index];
-                        final active = index == selectedIndex;
+                        final dayData = list[index * 8];
 
-                        return GestureDetector(
-                          onTap: () {
-                            setState(() {
-                              selectedIndex = index;
-                            });
-                          },
-                          child: AnimatedContainer(
-                            duration: const Duration(milliseconds: 300),
-                            width: 75,
-                            margin: const EdgeInsets.only(right: 15),
-                            decoration: BoxDecoration(
-                              shape: BoxShape.circle,
-                              gradient: active
-                                  ? const LinearGradient(colors: [
-                                      Color(0xFF7C3AED),
-                                      Color(0xFF9333EA)
-                                    ])
-                                  : null,
-                              border: Border.all(color: Colors.white24),
-                            ),
-                            child: Column(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                Text(
-                                  DateFormat('h a')
-                                      .format(DateTime.parse(item['dt_txt'])),
-                                  style: const TextStyle(
-                                      fontSize: 12, color: Colors.white70),
-                                ),
-                                const SizedBox(height: 5),
-                                Text("${item['main']['temp'].round()}°",
-                                    style:
-                                        const TextStyle(color: Colors.white)),
-                              ],
-                            ),
+                        final dayName = DateFormat('EEEE')
+                            .format(DateTime.parse(dayData['dt_txt']));
+
+                        final maxTemp = dayData['main']['temp_max'];
+                        final minTemp = dayData['main']['temp_min'];
+
+                        return Container(
+                          margin: const EdgeInsets.symmetric(
+                              horizontal: 16, vertical: 8),
+                          padding: const EdgeInsets.all(16),
+                          decoration: BoxDecoration(
+                            color: Colors.white.withOpacity(0.06),
+                            borderRadius: BorderRadius.circular(20),
+                          ),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Text(dayName,
+                                  style: const TextStyle(color: Colors.white)),
+                              Text("${maxTemp.round()}° / ${minTemp.round()}°",
+                                  style: const TextStyle(color: Colors.white)),
+                            ],
                           ),
                         );
                       },
                     ),
-                  ),
 
-                  const SizedBox(height: 40),
-                ],
+                    const SizedBox(height: 40),
+                  ],
+                ),
               ),
             ),
           ],
