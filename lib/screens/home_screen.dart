@@ -34,9 +34,7 @@ class _HomeScreenState extends State<HomeScreen>
 
   Future<void> loadWeather(String city) async {
     setState(() => isLoading = true);
-
     final data = await weatherService.fetchWeather(city);
-
     setState(() {
       weatherData = data;
       isLoading = false;
@@ -94,171 +92,174 @@ class _HomeScreenState extends State<HomeScreen>
     final list = weatherData!['list'];
 
     return Scaffold(
-      backgroundColor: const Color(0xFF1B1742), // ✅ এই লাইন add করো
-      body: RefreshIndicator(
-        onRefresh: () async {
-          loadWeather(weatherData!['city']['name']);
-        },
-        child: Container(
-          decoration: BoxDecoration(
-            gradient: LinearGradient(
-              colors: getGradient(desc),
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-            ),
+      backgroundColor: const Color(0xFF1B1742),
+      body: Container(
+        height: MediaQuery.of(context).size.height,
+        width: double.infinity,
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            colors: getGradient(desc),
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
           ),
-          child: Stack(
-            children: [
-              /// ✅ Rain
-              if (desc.toLowerCase().contains("rain"))
-                Positioned.fill(
-                  child: AnimatedBuilder(
-                    animation: controller,
-                    builder: (_, __) {
-                      return CustomPaint(
-                        painter: RainPainter(controller.value),
-                      );
-                    },
-                  ),
-                ),
-
-              /// ✅ Snow
-              if (desc.toLowerCase().contains("snow"))
-                Positioned.fill(
-                  child: AnimatedBuilder(
-                    animation: controller,
-                    builder: (_, __) {
-                      return CustomPaint(
-                        painter: SnowPainter(controller.value),
-                      );
-                    },
-                  ),
-                ),
-
-              /// ✅ Lightning
-              if (desc.toLowerCase().contains("storm"))
-                Positioned.fill(
-                  child: AnimatedBuilder(
-                    animation: controller,
-                    builder: (_, __) {
-                      return Opacity(
-                        opacity:
-                            sin(controller.value * pi * 8) > 0.95 ? 0.8 : 0,
-                        child: Container(color: Colors.white),
-                      );
-                    },
-                  ),
-                ),
-
-              SafeArea(
-                child: SingleChildScrollView(
-                  child: Column(
-                    children: [
-                      Padding(
-                        padding: const EdgeInsets.all(16),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Text(
-                              weatherData!['city']['name'],
-                              style: const TextStyle(
-                                  color: Colors.white, fontSize: 22),
-                            ),
-                            Row(
-                              children: [
-                                IconButton(
-                                  icon: const Icon(Icons.search,
-                                      color: Colors.white),
-                                  onPressed: () {
-                                    showSearchDialog(context);
-                                  },
-                                ),
-                                IconButton(
-                                  icon: const Icon(Icons.my_location,
-                                      color: Colors.white),
-                                  onPressed: loadLocation,
-                                ),
-                              ],
-                            )
-                          ],
-                        ),
-                      ),
-                      const SizedBox(height: 20),
-                      Text("${temp.round()}°",
-                          style: const TextStyle(
-                              fontSize: 100,
-                              fontWeight: FontWeight.w200,
-                              color: Colors.white)),
-                      Text(desc, style: const TextStyle(color: Colors.white70)),
-                      Text(
-                        DateFormat('h:mm a').format(DateTime.now()),
-                        style: const TextStyle(color: Colors.white60),
-                      ),
-                      const SizedBox(height: 40),
-                      SizedBox(
-                        height: 120,
-                        child: ListView.builder(
-                          scrollDirection: Axis.horizontal,
-                          itemCount: 8,
-                          itemBuilder: (context, index) {
-                            final item = list[index];
-
-                            final active = index == selectedIndex;
-
-                            return GestureDetector(
-                              onTap: () {
-                                setState(() {
-                                  selectedIndex = index;
-                                });
-                              },
-                              child: AnimatedContainer(
-                                duration: const Duration(milliseconds: 300),
-                                width: 75,
-                                margin: const EdgeInsets.only(right: 15),
-                                decoration: BoxDecoration(
-                                  shape: BoxShape.circle,
-                                  gradient: active
-                                      ? const LinearGradient(colors: [
-                                          Color(0xFF7C3AED),
-                                          Color(0xFF9333EA)
-                                        ])
-                                      : null,
-                                  border: Border.all(color: Colors.white24),
-                                ),
-                                child: Column(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  children: [
-                                    Text(
-                                      DateFormat('h a').format(
-                                          DateTime.parse(item['dt_txt'])),
-                                      style: const TextStyle(
-                                          fontSize: 12, color: Colors.white70),
-                                    ),
-                                    const SizedBox(height: 5),
-                                    Text("${item['main']['temp'].round()}°",
-                                        style: const TextStyle(
-                                            color: Colors.white)),
-                                  ],
-                                ),
-                              ),
-                            );
-                          },
-                        ),
-                      ),
-                      const SizedBox(height: 40),
-                    ],
-                  ),
+        ),
+        child: Stack(
+          children: [
+            /// ✅ Rain
+            if (desc.toLowerCase().contains("rain"))
+              Positioned.fill(
+                child: AnimatedBuilder(
+                  animation: controller,
+                  builder: (_, __) {
+                    return CustomPaint(
+                      painter: RainPainter(controller.value),
+                    );
+                  },
                 ),
               ),
-            ],
-          ),
+
+            /// ✅ Snow
+            if (desc.toLowerCase().contains("snow"))
+              Positioned.fill(
+                child: AnimatedBuilder(
+                  animation: controller,
+                  builder: (_, __) {
+                    return CustomPaint(
+                      painter: SnowPainter(controller.value),
+                    );
+                  },
+                ),
+              ),
+
+            /// ✅ Lightning
+            if (desc.toLowerCase().contains("storm"))
+              Positioned.fill(
+                child: AnimatedBuilder(
+                  animation: controller,
+                  builder: (_, __) {
+                    return Opacity(
+                      opacity: sin(controller.value * pi * 8) > 0.95 ? 0.8 : 0,
+                      child: Container(color: Colors.white),
+                    );
+                  },
+                ),
+              ),
+
+            SafeArea(
+              child: Column(
+                children: [
+                  /// ✅ Top Bar
+                  Padding(
+                    padding: const EdgeInsets.all(16),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          weatherData!['city']['name'],
+                          style: const TextStyle(
+                              color: Colors.white, fontSize: 22),
+                        ),
+                        Row(
+                          children: [
+                            IconButton(
+                              icon:
+                                  const Icon(Icons.search, color: Colors.white),
+                              onPressed: () {
+                                showSearchDialog(context);
+                              },
+                            ),
+                            IconButton(
+                              icon: const Icon(Icons.my_location,
+                                  color: Colors.white),
+                              onPressed: loadLocation,
+                            ),
+                          ],
+                        )
+                      ],
+                    ),
+                  ),
+
+                  const SizedBox(height: 20),
+
+                  /// ✅ Temperature
+                  Text("${temp.round()}°",
+                      style: const TextStyle(
+                          fontSize: 100,
+                          fontWeight: FontWeight.w200,
+                          color: Colors.white)),
+
+                  Text(desc, style: const TextStyle(color: Colors.white70)),
+
+                  Text(
+                    DateFormat('h:mm a').format(DateTime.now()),
+                    style: const TextStyle(color: Colors.white60),
+                  ),
+
+                  const SizedBox(height: 40),
+
+                  /// ✅ Hourly
+                  SizedBox(
+                    height: 120,
+                    child: ListView.builder(
+                      scrollDirection: Axis.horizontal,
+                      itemCount: 8,
+                      itemBuilder: (context, index) {
+                        final item = list[index];
+                        final active = index == selectedIndex;
+
+                        return GestureDetector(
+                          onTap: () {
+                            setState(() {
+                              selectedIndex = index;
+                            });
+                          },
+                          child: AnimatedContainer(
+                            duration: const Duration(milliseconds: 300),
+                            width: 75,
+                            margin: const EdgeInsets.only(right: 15),
+                            decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              gradient: active
+                                  ? const LinearGradient(colors: [
+                                      Color(0xFF7C3AED),
+                                      Color(0xFF9333EA)
+                                    ])
+                                  : null,
+                              border: Border.all(color: Colors.white24),
+                            ),
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Text(
+                                  DateFormat('h a')
+                                      .format(DateTime.parse(item['dt_txt'])),
+                                  style: const TextStyle(
+                                      fontSize: 12, color: Colors.white70),
+                                ),
+                                const SizedBox(height: 5),
+                                Text("${item['main']['temp'].round()}°",
+                                    style:
+                                        const TextStyle(color: Colors.white)),
+                              ],
+                            ),
+                          ),
+                        );
+                      },
+                    ),
+                  ),
+
+                  const SizedBox(height: 40),
+                ],
+              ),
+            ),
+          ],
         ),
       ),
     );
   }
 
   void showSearchDialog(BuildContext context) {
-    TextEditingController controller = TextEditingController();
+    TextEditingController textController = TextEditingController();
 
     showDialog(
       context: context,
@@ -266,7 +267,7 @@ class _HomeScreenState extends State<HomeScreen>
         backgroundColor: const Color(0xFF1B1742),
         title: const Text("Search City", style: TextStyle(color: Colors.white)),
         content: TextField(
-          controller: controller,
+          controller: textController,
           style: const TextStyle(color: Colors.white),
           decoration: const InputDecoration(
             hintText: "Enter city name",
@@ -283,7 +284,7 @@ class _HomeScreenState extends State<HomeScreen>
           TextButton(
             onPressed: () {
               Navigator.pop(context);
-              loadWeather(controller.text.trim());
+              loadWeather(textController.text.trim());
             },
             child: const Text("Search"),
           ),
