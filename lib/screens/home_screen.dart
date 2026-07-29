@@ -94,6 +94,7 @@ class _HomeScreenState extends State<HomeScreen>
     final list = weatherData!['list'];
 
     return Scaffold(
+      backgroundColor: const Color(0xFF1B1742), // ✅ এই লাইন add করো
       body: RefreshIndicator(
         onRefresh: () async {
           loadWeather(weatherData!['city']['name']);
