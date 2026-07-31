@@ -2,7 +2,7 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 
 class WeatherService {
-  final String apiKey = "1845fcc1ff3728d3512beb854aacbb7e";
+  final String apiKey = "764b8ca9b084145040e857d9206d2c49";
 
   Future<Map<String, dynamic>?> fetchWeather(String city) async {
     try {
@@ -16,12 +16,16 @@ class WeatherService {
 
         if (data['cod'] == "200") {
           return data;
+        } else {
+          print("API error: ${data['message']}");
+          return null;
         }
+      } else {
+        print("HTTP error: ${response.statusCode}");
+        return null;
       }
-
-      return null;
     } catch (e) {
-      print("API ERROR: $e");
+      print("Network error: $e");
       return null;
     }
   }
@@ -38,12 +42,16 @@ class WeatherService {
 
         if (data['cod'] == "200") {
           return data;
+        } else {
+          print("API error: ${data['message']}");
+          return null;
         }
+      } else {
+        print("HTTP error: ${response.statusCode}");
+        return null;
       }
-
-      return null;
     } catch (e) {
-      print("API ERROR: $e");
+      print("Network error: $e");
       return null;
     }
   }

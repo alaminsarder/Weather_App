@@ -25,7 +25,9 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Future<void> loadWeather(String city) async {
     setState(() => isLoading = true);
+
     final data = await weatherService.fetchWeather(city);
+
     setState(() {
       weatherData = data;
       isLoading = false;
