@@ -1,5 +1,3 @@
-import 'dart:ui';
-import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:geolocator/geolocator.dart';
@@ -12,31 +10,22 @@ class HomeScreen extends StatefulWidget {
   State<HomeScreen> createState() => _HomeScreenState();
 }
 
-class _HomeScreenState extends State<HomeScreen>
-    with SingleTickerProviderStateMixin {
+class _HomeScreenState extends State<HomeScreen> {
   final WeatherService weatherService = WeatherService();
 
   Map<String, dynamic>? weatherData;
   bool isLoading = true;
-
-  late AnimationController controller;
   int selectedIndex = 0;
 
   @override
   void initState() {
     super.initState();
     loadWeather("Bogura");
-
-    controller =
-        AnimationController(vsync: this, duration: const Duration(seconds: 2))
-          ..repeat();
   }
 
   Future<void> loadWeather(String city) async {
     setState(() => isLoading = true);
-
     final data = await weatherService.fetchWeather(city);
-
     setState(() {
       weatherData = data;
       isLoading = false;
@@ -70,180 +59,164 @@ class _HomeScreenState extends State<HomeScreen>
       );
     }
 
-    if (weatherData == null) {
+    if (weatherData == null ||
+        weatherData!['list'] == null ||
+        (weatherData!['list'] as List).isEmpty) {
       return const Scaffold(
+        backgroundColor: Colors.black,
         body: Center(
           child: Text(
-            "Failed to load weather",
-            style: TextStyle(color: Colors.white),
+            "Weather data not available",
+            style: TextStyle(color: Colors.white, fontSize: 18),
           ),
         ),
       );
     }
 
-    final current = weatherData!['list'][0];
+    final list = weatherData!['list'] as List;
+    final current = list.first;
     final temp = current['main']['temp'];
     final desc = current['weather'][0]['main'];
-    final list = weatherData!['list'];
 
     final totalDays = (list.length / 8).floor();
 
     return Scaffold(
       backgroundColor: const Color(0xFF1B1742),
-      body: Container(
-        height: MediaQuery.of(context).size.height,
-        width: double.infinity,
-        decoration: const BoxDecoration(
-          gradient: LinearGradient(
-            colors: [Color(0xFF1B1742), Color(0xFF4B1D74)],
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-          ),
-        ),
-        child: SafeArea(
-          child: SingleChildScrollView(
-            child: Column(
-              children: [
-                /// Top Bar
-                Padding(
-                  padding: const EdgeInsets.all(16),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text(
-                        weatherData!['city']['name'],
-                        style:
-                            const TextStyle(color: Colors.white, fontSize: 22),
-                      ),
-                      Row(
-                        children: [
-                          IconButton(
-                            icon: const Icon(Icons.search, color: Colors.white),
-                            onPressed: () {
-                              showSearchDialog(context);
-                            },
-                          ),
-                          IconButton(
-                            icon: const Icon(Icons.my_location,
-                                color: Colors.white),
-                            onPressed: loadLocation,
-                          ),
-                        ],
-                      )
-                    ],
-                  ),
-                ),
-
-                const SizedBox(height: 20),
-
-                /// Temperature
-                Text("${temp.round()}°",
-                    style: const TextStyle(
-                        fontSize: 100,
-                        fontWeight: FontWeight.w200,
-                        color: Colors.white)),
-
-                Text(desc, style: const TextStyle(color: Colors.white70)),
-
-                Text(
-                  DateFormat('h:mm a').format(DateTime.now()),
-                  style: const TextStyle(color: Colors.white60),
-                ),
-
-                const SizedBox(height: 30),
-
-                /// Hourly
-                SizedBox(
-                  height: 120,
-                  child: ListView.builder(
-                    scrollDirection: Axis.horizontal,
-                    itemCount: 8,
-                    itemBuilder: (context, index) {
-                      final item = list[index];
-                      final active = index == selectedIndex;
-
-                      return GestureDetector(
-                        onTap: () {
-                          setState(() {
-                            selectedIndex = index;
-                          });
-                        },
-                        child: AnimatedContainer(
-                          duration: const Duration(milliseconds: 300),
-                          width: 75,
-                          margin: const EdgeInsets.only(right: 15),
-                          decoration: BoxDecoration(
-                            shape: BoxShape.circle,
-                            gradient: active
-                                ? const LinearGradient(colors: [
-                                    Color(0xFF7C3AED),
-                                    Color(0xFF9333EA)
-                                  ])
-                                : null,
-                            border: Border.all(color: Colors.white24),
-                          ),
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Text(
-                                DateFormat('h a')
-                                    .format(DateTime.parse(item['dt_txt'])),
-                                style: const TextStyle(
-                                    fontSize: 12, color: Colors.white70),
-                              ),
-                              const SizedBox(height: 5),
-                              Text("${item['main']['temp'].round()}°",
-                                  style: const TextStyle(color: Colors.white)),
-                            ],
-                          ),
+      body: SafeArea(
+        child: SingleChildScrollView(
+          child: Column(
+            children: [
+              /// Top Bar
+              Padding(
+                padding: const EdgeInsets.all(16),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      weatherData!['city']['name'],
+                      style: const TextStyle(color: Colors.white, fontSize: 22),
+                    ),
+                    Row(
+                      children: [
+                        IconButton(
+                          icon: const Icon(Icons.search, color: Colors.white),
+                          onPressed: () {
+                            showSearchDialog(context);
+                          },
                         ),
-                      );
-                    },
-                  ),
+                        IconButton(
+                          icon: const Icon(Icons.my_location,
+                              color: Colors.white),
+                          onPressed: loadLocation,
+                        ),
+                      ],
+                    )
+                  ],
                 ),
+              ),
 
-                const SizedBox(height: 30),
+              const SizedBox(height: 20),
 
-                /// 5 Days
-                ListView.builder(
-                  shrinkWrap: true,
-                  physics: const NeverScrollableScrollPhysics(),
-                  itemCount: totalDays,
+              /// Temperature
+              Text("${temp.round()}°",
+                  style: const TextStyle(
+                      fontSize: 90,
+                      fontWeight: FontWeight.w200,
+                      color: Colors.white)),
+
+              Text(desc, style: const TextStyle(color: Colors.white70)),
+
+              Text(
+                DateFormat('h:mm a').format(DateTime.now()),
+                style: const TextStyle(color: Colors.white60),
+              ),
+
+              const SizedBox(height: 30),
+
+              /// Hourly
+              SizedBox(
+                height: 120,
+                child: ListView.builder(
+                  scrollDirection: Axis.horizontal,
+                  itemCount: 8,
                   itemBuilder: (context, index) {
-                    final dayIndex = index * 8;
+                    final item = list[index];
+                    final active = index == selectedIndex;
 
-                    final dayData = list[dayIndex];
-
-                    final dayName = DateFormat('EEEE')
-                        .format(DateTime.parse(dayData['dt_txt']));
-
-                    final maxTemp = dayData['main']['temp_max'];
-                    final minTemp = dayData['main']['temp_min'];
-
-                    return Container(
-                      margin: const EdgeInsets.symmetric(
-                          horizontal: 16, vertical: 8),
-                      padding: const EdgeInsets.all(16),
-                      decoration: BoxDecoration(
-                        color: Colors.white.withOpacity(0.06),
-                        borderRadius: BorderRadius.circular(20),
-                      ),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Text(dayName,
-                              style: const TextStyle(color: Colors.white)),
-                          Text("${maxTemp.round()}° / ${minTemp.round()}°",
-                              style: const TextStyle(color: Colors.white)),
-                        ],
+                    return GestureDetector(
+                      onTap: () {
+                        setState(() {
+                          selectedIndex = index;
+                        });
+                      },
+                      child: AnimatedContainer(
+                        duration: const Duration(milliseconds: 300),
+                        width: 75,
+                        margin: const EdgeInsets.only(right: 15),
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          color: active ? Colors.purple : Colors.transparent,
+                          border: Border.all(color: Colors.white24),
+                        ),
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Text(
+                              DateFormat('h a')
+                                  .format(DateTime.parse(item['dt_txt'])),
+                              style: const TextStyle(
+                                  fontSize: 12, color: Colors.white70),
+                            ),
+                            const SizedBox(height: 5),
+                            Text("${item['main']['temp'].round()}°",
+                                style: const TextStyle(color: Colors.white)),
+                          ],
+                        ),
                       ),
                     );
                   },
                 ),
+              ),
 
-                const SizedBox(height: 40),
-              ],
-            ),
+              const SizedBox(height: 30),
+
+              /// 5 Days
+              ListView.builder(
+                shrinkWrap: true,
+                physics: const NeverScrollableScrollPhysics(),
+                itemCount: totalDays,
+                itemBuilder: (context, index) {
+                  final dayData = list[index * 8];
+
+                  final dayName = DateFormat('EEEE')
+                      .format(DateTime.parse(dayData['dt_txt']));
+
+                  final maxTemp = dayData['main']['temp_max'];
+                  final minTemp = dayData['main']['temp_min'];
+
+                  return Container(
+                    margin:
+                        const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                    padding: const EdgeInsets.all(16),
+                    decoration: BoxDecoration(
+                      color: Colors.white.withOpacity(0.06),
+                      borderRadius: BorderRadius.circular(20),
+                    ),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(dayName,
+                            style: const TextStyle(color: Colors.white)),
+                        Text("${maxTemp.round()}° / ${minTemp.round()}°",
+                            style: const TextStyle(color: Colors.white)),
+                      ],
+                    ),
+                  );
+                },
+              ),
+
+              const SizedBox(height: 40),
+            ],
           ),
         ),
       ),
@@ -251,7 +224,7 @@ class _HomeScreenState extends State<HomeScreen>
   }
 
   void showSearchDialog(BuildContext context) {
-    TextEditingController textController = TextEditingController();
+    TextEditingController controller = TextEditingController();
 
     showDialog(
       context: context,
@@ -259,7 +232,7 @@ class _HomeScreenState extends State<HomeScreen>
         backgroundColor: const Color(0xFF1B1742),
         title: const Text("Search City", style: TextStyle(color: Colors.white)),
         content: TextField(
-          controller: textController,
+          controller: controller,
           style: const TextStyle(color: Colors.white),
           decoration: const InputDecoration(
             hintText: "Enter city name",
@@ -268,15 +241,13 @@ class _HomeScreenState extends State<HomeScreen>
         ),
         actions: [
           TextButton(
-            onPressed: () {
-              Navigator.pop(context);
-            },
+            onPressed: () => Navigator.pop(context),
             child: const Text("Cancel"),
           ),
           TextButton(
             onPressed: () {
               Navigator.pop(context);
-              loadWeather(textController.text.trim());
+              loadWeather(controller.text.trim());
             },
             child: const Text("Search"),
           ),
