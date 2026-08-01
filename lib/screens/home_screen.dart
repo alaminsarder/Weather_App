@@ -13,7 +13,7 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   final WeatherService weatherService = WeatherService();
 
-  Map<String, dynamic>? weatherData;
+  dynamic weatherData;
   bool isLoading = true;
   int selectedIndex = 0;
 
@@ -61,9 +61,7 @@ class _HomeScreenState extends State<HomeScreen> {
       );
     }
 
-    if (weatherData == null ||
-        weatherData!['list'] == null ||
-        (weatherData!['list'] as List).isEmpty) {
+    if (weatherData == null || weatherData['list'] == null) {
       return const Scaffold(
         backgroundColor: Colors.black,
         body: Center(
@@ -75,10 +73,25 @@ class _HomeScreenState extends State<HomeScreen> {
       );
     }
 
-    final list = weatherData!['list'] as List;
-    final current = list.first;
+    final List list = weatherData['list'];
+
+    if (list.isEmpty) {
+      return const Scaffold(
+        backgroundColor: Colors.black,
+        body: Center(
+          child: Text(
+            "No forecast data",
+            style: TextStyle(color: Colors.white, fontSize: 18),
+          ),
+        ),
+      );
+    }
+
+    final current = list[0];
+
     final temp = current['main']['temp'];
-    final desc = current['weather'][0]['main'];
+
+    final desc = current['weather'][0]['description'];
 
     final totalDays = (list.length / 8).floor();
 
@@ -88,14 +101,13 @@ class _HomeScreenState extends State<HomeScreen> {
         child: SingleChildScrollView(
           child: Column(
             children: [
-              /// Top Bar
               Padding(
                 padding: const EdgeInsets.all(16),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Text(
-                      weatherData!['city']['name'],
+                      weatherData['city']['name'],
                       style: const TextStyle(color: Colors.white, fontSize: 22),
                     ),
                     Row(
@@ -116,26 +128,18 @@ class _HomeScreenState extends State<HomeScreen> {
                   ],
                 ),
               ),
-
               const SizedBox(height: 20),
-
-              /// Temperature
               Text("${temp.round()}°",
                   style: const TextStyle(
                       fontSize: 90,
                       fontWeight: FontWeight.w200,
                       color: Colors.white)),
-
               Text(desc, style: const TextStyle(color: Colors.white70)),
-
               Text(
                 DateFormat('h:mm a').format(DateTime.now()),
                 style: const TextStyle(color: Colors.white60),
               ),
-
               const SizedBox(height: 30),
-
-              /// Hourly
               SizedBox(
                 height: 120,
                 child: ListView.builder(
@@ -179,10 +183,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   },
                 ),
               ),
-
               const SizedBox(height: 30),
-
-              /// 5 Days
               ListView.builder(
                 shrinkWrap: true,
                 physics: const NeverScrollableScrollPhysics(),
@@ -216,7 +217,6 @@ class _HomeScreenState extends State<HomeScreen> {
                   );
                 },
               ),
-
               const SizedBox(height: 40),
             ],
           ),

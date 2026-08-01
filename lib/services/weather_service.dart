@@ -12,25 +12,19 @@ class WeatherService {
       final response = await http.get(Uri.parse(url));
 
       if (response.statusCode == 200) {
-        final data = jsonDecode(response.body);
-
-        if (data['cod'] == "200") {
-          return data;
-        } else {
-          print("API error: ${data['message']}");
-          return null;
-        }
-      } else {
-        print("HTTP error: ${response.statusCode}");
-        return null;
+        return jsonDecode(response.body);
       }
+
+      print("HTTP Error: ${response.statusCode}");
+      return null;
     } catch (e) {
-      print("Network error: $e");
+      print("Network Error: $e");
       return null;
     }
   }
 
-  Future<Map<String, dynamic>?> fetchByLocation(double lat, double lon) async {
+  Future<Map<String, dynamic>?> fetchByLocation(
+      double lat, double lon) async {
     try {
       final url =
           "https://api.openweathermap.org/data/2.5/forecast?lat=$lat&lon=$lon&appid=$apiKey&units=metric";
@@ -38,20 +32,12 @@ class WeatherService {
       final response = await http.get(Uri.parse(url));
 
       if (response.statusCode == 200) {
-        final data = jsonDecode(response.body);
-
-        if (data['cod'] == "200") {
-          return data;
-        } else {
-          print("API error: ${data['message']}");
-          return null;
-        }
-      } else {
-        print("HTTP error: ${response.statusCode}");
-        return null;
+        return jsonDecode(response.body);
       }
+
+      return null;
     } catch (e) {
-      print("Network error: $e");
+      print("Network Error: $e");
       return null;
     }
   }
