@@ -1,26 +1,25 @@
-import 'dart:ui';
 import 'package:flutter/material.dart';
 
 class GlassCard extends StatelessWidget {
   final Widget child;
+  final EdgeInsetsGeometry padding;
 
-  const GlassCard({super.key, required this.child});
+  const GlassCard({
+    super.key,
+    required this.child,
+    this.padding = const EdgeInsets.all(16),
+  });
 
   @override
   Widget build(BuildContext context) {
-    return ClipRRect(
-      borderRadius: BorderRadius.circular(25),
-      child: BackdropFilter(
-        filter: ImageFilter.blur(sigmaX: 20, sigmaY: 20),
-        child: Container(
-          padding: const EdgeInsets.all(20),
-          decoration: BoxDecoration(
-            color: Colors.white.withValues(alpha: 0.08),
-            borderRadius: BorderRadius.circular(25),
-          ),
-          child: child,
-        ),
+    return Container(
+      padding: padding,
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: const Color(0xFFE5E7EB)),
       ),
+      child: child,
     );
   }
 }

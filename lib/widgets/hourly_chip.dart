@@ -1,39 +1,53 @@
 import 'package:flutter/material.dart';
+import '../main.dart';
 
 class HourlyChip extends StatelessWidget {
   final String time;
   final String temp;
+  final IconData icon;
   final bool isActive;
 
   const HourlyChip({
     super.key,
     required this.time,
     required this.temp,
+    this.icon = Icons.wb_cloudy_rounded,
     this.isActive = false,
   });
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      width: 75,
-      margin: const EdgeInsets.only(right: 15),
+      width: 58,
+      padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 8),
       decoration: BoxDecoration(
-        shape: BoxShape.circle,
-        gradient: isActive
-            ? const LinearGradient(
-                colors: [Color(0xFF7C3AED), Color(0xFF9333EA)],
-              )
-            : null,
-        border: Border.all(color: Colors.white24),
+        color: isActive ? kAccent.withOpacity(0.08) : Colors.transparent,
+        borderRadius: BorderRadius.circular(12),
       ),
       child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Text(time,
-              style: const TextStyle(fontSize: 12, color: Colors.white70)),
-          const SizedBox(height: 5),
-          const Icon(Icons.cloud, color: Colors.white),
-          Text(temp, style: const TextStyle(color: Colors.white)),
+          Text(
+            time,
+            style: TextStyle(
+              fontSize: 11,
+              fontWeight: FontWeight.w500,
+              color: isActive ? kAccent : const Color(0xFF6B7280),
+            ),
+          ),
+          Icon(
+            icon,
+            size: 20,
+            color: isActive ? kAccent : const Color(0xFF6B7280),
+          ),
+          Text(
+            temp,
+            style: const TextStyle(
+              fontSize: 13,
+              fontWeight: FontWeight.w600,
+              color: Color(0xFF1F2937),
+            ),
+          ),
         ],
       ),
     );

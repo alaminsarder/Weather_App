@@ -8,37 +8,43 @@ class WeatherService {
     try {
       final url =
           "https://api.openweathermap.org/data/2.5/forecast?q=$city&appid=$apiKey&units=metric";
-
       final response = await http.get(Uri.parse(url));
-
       if (response.statusCode == 200) {
         return jsonDecode(response.body);
       }
-
-      print("HTTP Error: ${response.statusCode}");
       return null;
     } catch (e) {
-      print("Network Error: $e");
       return null;
     }
   }
 
-  Future<Map<String, dynamic>?> fetchByLocation(
-      double lat, double lon) async {
+  Future<Map<String, dynamic>?> fetchByLocation(double lat, double lon) async {
     try {
       final url =
           "https://api.openweathermap.org/data/2.5/forecast?lat=$lat&lon=$lon&appid=$apiKey&units=metric";
-
       final response = await http.get(Uri.parse(url));
-
       if (response.statusCode == 200) {
         return jsonDecode(response.body);
       }
-
       return null;
     } catch (e) {
-      print("Network Error: $e");
       return null;
+    }
+  }
+
+  // City search (OpenWeatherMap Geocoding)
+  Future<List<Map<String, dynamic>>> searchCity(String query) async {
+    try {
+      final url =
+          "https://api.openweathermap.org/geo/1.0/direct?q=$query&limit=5&appid=$apiKey";
+      final response = await http.get(Uri.parse(url));
+      if (response.statusCode == 200) {
+        final List data = jsonDecode(response.body);
+        return data.cast<Map<String, dynamic>>();
+      }
+      return [];
+    } catch (e) {
+      return [];
     }
   }
 }
