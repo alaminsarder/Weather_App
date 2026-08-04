@@ -1,3 +1,4 @@
+import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:geolocator/geolocator.dart';
@@ -200,7 +201,6 @@ class _HomeScreenState extends State<HomeScreen> {
 
     final totalDays = (list.length / 8).floor();
 
-    // Temperature series for chart (next 12 slots = 36 hours)
     final chartData = list
         .take(12)
         .map<double>((e) => (e['main']['temp'] as num).toDouble())
@@ -213,7 +213,6 @@ class _HomeScreenState extends State<HomeScreen> {
 
     return Column(
       children: [
-        // ─── Top Bar ───
         Container(
           height: 56,
           padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -276,11 +275,10 @@ class _HomeScreenState extends State<HomeScreen> {
             ],
           ),
         ),
-
         Expanded(
           child: RefreshIndicator(
             color: kAccent,
-            backgroundColor: kCardSolid,
+            backgroundColor: kBgMid,
             onRefresh: () => loadWeather("$cityName,BD"),
             child: SingleChildScrollView(
               physics: const AlwaysScrollableScrollPhysics(),
@@ -304,7 +302,6 @@ class _HomeScreenState extends State<HomeScreen> {
                         ],
                       ),
                     ),
-
                   _CurrentCard(
                     temp: temp,
                     feels: feels,
@@ -322,26 +319,19 @@ class _HomeScreenState extends State<HomeScreen> {
                     bearing: _bearing(windDeg),
                     icon: _iconFor(main),
                   ),
-
                   const SizedBox(height: 12),
-
                   _HourlyStrip(
                     list: list,
                     selectedIndex: selectedIndex,
                     onSelect: (i) => setState(() => selectedIndex = i),
                     iconFor: _iconFor,
                   ),
-
                   const SizedBox(height: 12),
-
-                  // ─── Temperature Chart ───
                   _TemperatureChart(
                     values: chartData,
                     labels: chartLabels,
                   ),
-
                   const SizedBox(height: 12),
-
                   _DetailCards(
                     sunrise: sunrise,
                     sunset: sunset,
@@ -352,15 +342,12 @@ class _HomeScreenState extends State<HomeScreen> {
                     humidity: humidity,
                     pressure: pressure,
                   ),
-
                   const SizedBox(height: 12),
-
                   _DailyForecast(
                     list: list,
                     totalDays: totalDays,
                     iconFor: _iconFor,
                   ),
-
                   const SizedBox(height: 24),
                 ],
               ),
@@ -431,7 +418,7 @@ class _InitialLoader extends StatelessWidget {
   }
 }
 
-// ─────────── Current Card ───────────
+// ─────────── Current Card (NEW COLOR: #2B5675) ───────────
 class _CurrentCard extends StatelessWidget {
   final num temp;
   final num feels;
@@ -472,9 +459,19 @@ class _CurrentCard extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: Colors.black.withOpacity(0.20),
+        // ✨ NEW: #2B5675 with 25% opacity
+        color: const Color(0xFF2B5675).withOpacity(0.25),
         borderRadius: BorderRadius.circular(20),
+        // ✨ NEW: White border 15% opacity
         border: Border.all(color: Colors.white.withOpacity(0.15)),
+        // ✨ NEW: Black shadow 10% opacity
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.10),
+            blurRadius: 20,
+            offset: const Offset(0, 8),
+          ),
+        ],
       ),
       child: Stack(
         children: [
@@ -650,8 +647,8 @@ class _HourlyStrip extends StatelessWidget {
             padding: const EdgeInsets.fromLTRB(16, 12, 16, 10),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                const Text(
+              children: const [
+                Text(
                   'Hourly',
                   style: TextStyle(
                     fontSize: 13,
@@ -659,7 +656,7 @@ class _HourlyStrip extends StatelessWidget {
                     color: kTextPrimary,
                   ),
                 ),
-                const Text(
+                Text(
                   'Next 24 h',
                   style: TextStyle(fontSize: 10, color: kTextMuted),
                 ),
@@ -815,7 +812,6 @@ class _ChartPainter extends CustomPainter {
     final double chartW = size.width - leftPad - rightPad;
     final double chartH = size.height - topPad - bottomPad;
 
-    // Grid lines
     final gridPaint = Paint()
       ..color = Colors.white.withOpacity(0.08)
       ..strokeWidth = 1;
@@ -829,7 +825,6 @@ class _ChartPainter extends CustomPainter {
       );
     }
 
-    // Compute points
     final points = <Offset>[];
     for (int i = 0; i < values.length; i++) {
       final x = leftPad + (chartW / (values.length - 1)) * i;
@@ -838,7 +833,6 @@ class _ChartPainter extends CustomPainter {
       points.add(Offset(x, y));
     }
 
-    // Fill area (gradient)
     final fillPath = Path()..moveTo(points.first.dx, topPad + chartH);
     for (int i = 0; i < points.length; i++) {
       if (i == 0) {
@@ -865,7 +859,6 @@ class _ChartPainter extends CustomPainter {
 
     canvas.drawPath(fillPath, fillPaint);
 
-    // Line
     final linePath = Path()..moveTo(points.first.dx, points.first.dy);
     for (int i = 1; i < points.length; i++) {
       final prev = points[i - 1];
@@ -883,17 +876,14 @@ class _ChartPainter extends CustomPainter {
 
     canvas.drawPath(linePath, linePaint);
 
-    // Dots + temp label on each point
     final dotPaint = Paint()..color = kAccent;
     final dotBg = Paint()..color = Colors.white;
 
     for (int i = 0; i < points.length; i++) {
-      // Only draw dot every 2nd point to avoid clutter
       if (i % 2 == 0) {
         canvas.drawCircle(points[i], 4, dotBg);
         canvas.drawCircle(points[i], 2.5, dotPaint);
 
-        // Temp label above point
         final tp = TextPainter(
           text: TextSpan(
             text: '${values[i].round()}°',
@@ -903,7 +893,7 @@ class _ChartPainter extends CustomPainter {
               fontWeight: FontWeight.w600,
             ),
           ),
-          textDirection: TextDirection.ltr,
+          textDirection: ui.TextDirection.ltr,
         )..layout();
         tp.paint(
           canvas,
@@ -912,7 +902,6 @@ class _ChartPainter extends CustomPainter {
       }
     }
 
-    // X-axis labels (every 2nd)
     for (int i = 0; i < labels.length; i++) {
       if (i % 2 == 0) {
         final tp = TextPainter(
@@ -923,7 +912,7 @@ class _ChartPainter extends CustomPainter {
               fontSize: 9,
             ),
           ),
-          textDirection: TextDirection.ltr,
+          textDirection: ui.TextDirection.ltr,
         )..layout();
         tp.paint(
           canvas,
@@ -1024,7 +1013,6 @@ class _DetailCards extends StatelessWidget {
                 ],
               ),
               const Spacer(),
-              // Mini arc for sun position
               _SunArc(sunrise: sunrise, sunset: sunset),
             ],
           ),
@@ -1098,7 +1086,6 @@ class _DetailCards extends StatelessWidget {
                   style: TextStyle(fontSize: 11, color: kTextMuted),
                 ),
                 const SizedBox(height: 6),
-                // Mini bar
                 ClipRRect(
                   borderRadius: BorderRadius.circular(4),
                   child: Container(
@@ -1223,7 +1210,6 @@ class _SunArcPainter extends CustomPainter {
 
     canvas.drawPath(path, paint);
 
-    // Sun dot
     final t = pct;
     final x = size.width * t;
     final y =
