@@ -25,7 +25,7 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   void initState() {
     super.initState();
-    loadWeather("Bogura,BD");
+    loadWeather("Bogra,BD");
   }
 
   Future<void> loadWeather(String city) async {
